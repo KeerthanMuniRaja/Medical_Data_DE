@@ -1,0 +1,77 @@
+resources:
+  jobs:
+    orchestrating_workflow:
+      name: orchestrating_workflow
+      tasks:
+        - task_key: Data_Ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/01_bronze/raw/nb_rawdata_ingestion
+            source: WORKSPACE
+        - task_key: Silver_encounter
+          depends_on:
+            - task_key: Data_Ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/02_silver/core/nb_silver_encounter
+            source: WORKSPACE
+        - task_key: dim_encounter
+          depends_on:
+            - task_key: Silver_encounter
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/03_gold/data_mart/nb_dim_encounter
+            source: WORKSPACE
+        - task_key: silver_patient
+          depends_on:
+            - task_key: Data_Ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/02_silver/core/nb_silver_patients
+            source: WORKSPACE
+        - task_key: dim_patient
+          depends_on:
+            - task_key: silver_patient
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/03_gold/data_mart/nb_dim_patient
+            source: WORKSPACE
+        - task_key: silver_payer
+          depends_on:
+            - task_key: Data_Ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/02_silver/core/nb_silver_payers
+            source: WORKSPACE
+        - task_key: dim_payer
+          depends_on:
+            - task_key: silver_payer
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/03_gold/data_mart/nb_dim_payer
+            source: WORKSPACE
+        - task_key: silver_procedure
+          depends_on:
+            - task_key: Data_Ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/02_silver/core/nb_silver_procedures
+            source: WORKSPACE
+        - task_key: dim_procedure
+          depends_on:
+            - task_key: silver_procedure
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/03_gold/data_mart/nb_dim_procedure
+            source: WORKSPACE
+        - task_key: fact_encounter
+          depends_on:
+            - task_key: dim_procedure
+            - task_key: Silver_encounter
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/03_gold/data_mart/nb_fact_encounters
+            source: WORKSPACE
+        - task_key: kpi
+          depends_on:
+            - task_key: fact_encounter
+            - task_key: dim_patient
+            - task_key: dim_encounter
+            - task_key: dim_payer
+            - task_key: dim_procedure
+          notebook_task:
+            notebook_path: /Workspace/Users/keerthanmuniraja@gmail.com/Medical_Data_DE/03_gold/kpi's/nb_kpi
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
